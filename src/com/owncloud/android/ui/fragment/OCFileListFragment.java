@@ -585,7 +585,6 @@ public class OCFileListFragment extends ExtendedListFragment {
                 return true;
             }
             case R.id.action_unfavorite_file: {
-                // TODO : Check if file is favorite due to inheritance
                 mContainerActivity.getFileOperationsHelper().toggleFavorites(checkedFiles, false);
                 return true;
             }
