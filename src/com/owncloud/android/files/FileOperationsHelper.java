@@ -466,9 +466,9 @@ public class FileOperationsHelper {
     }
 
     public void toggleFavorite(OCFile file, boolean isFavorite) {
-        OCFile.FavoriteStatus favoriteStatus = isFavorite  ?
-                OCFile.FavoriteStatus.FAVORITE : OCFile.FavoriteStatus.NO_FAVORITE;
-        file.setFavoriteStatus(favoriteStatus);
+        OCFile.AvailableOfflineStatus availableOfflineStatus = isFavorite  ?
+                OCFile.AvailableOfflineStatus.AVAILABLE_OFFLINE : OCFile.AvailableOfflineStatus.NO_AVAILABLE_OFFLINE;
+        file.setAvailableOfflineStatus(availableOfflineStatus);
         mFileActivity.getStorageManager().saveFile(file);
 
         // If file is a folder, all children files that were available offline must be unset
@@ -485,17 +485,17 @@ public class FileOperationsHelper {
         mFileActivity.startService(observedFileIntent);
 
         /// immediate content synchronization
-        if (file.getFavoriteStatus() == OCFile.FavoriteStatus.FAVORITE) {
+        if (file.getAvailableOfflineStatus() == OCFile.AvailableOfflineStatus.AVAILABLE_OFFLINE) {
             syncFile(file);
         }
     }
 
     private void toggleAvailableOfflineFilesInFolder(OCFile file, boolean isAvailableOffline) {
-        OCFile.FavoriteStatus favoriteStatus = isAvailableOffline ?
-                OCFile.FavoriteStatus.FAVORITE : OCFile.FavoriteStatus.NO_FAVORITE;
+        OCFile.AvailableOfflineStatus availableOfflineStatus = isAvailableOffline ?
+                OCFile.AvailableOfflineStatus.AVAILABLE_OFFLINE : OCFile.AvailableOfflineStatus.NO_AVAILABLE_OFFLINE;
         Vector<OCFile> filesInFolder = mFileActivity.getStorageManager().getFolderContent(file);
         for (OCFile fileInFolder: filesInFolder) {
-            fileInFolder.setFavoriteStatus(favoriteStatus);
+            fileInFolder.setAvailableOfflineStatus(availableOfflineStatus);
             mFileActivity.getStorageManager().saveFile(fileInFolder);
             if (fileInFolder.isFolder()) {
                 toggleAvailableOfflineFilesInFolder(fileInFolder, isAvailableOffline);

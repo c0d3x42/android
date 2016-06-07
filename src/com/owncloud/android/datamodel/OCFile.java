@@ -55,26 +55,26 @@ public class OCFile implements Parcelable, Comparable<OCFile> {
     public static final String PATH_SEPARATOR = "/";
     public static final String ROOT_PATH = PATH_SEPARATOR;
 
-    public enum FavoriteStatus {
+    public enum AvailableOfflineStatus {
 
         /**
-         * File is not favorite
+         * File is not available offline
          */
-        NO_FAVORITE(0),
+        NO_AVAILABLE_OFFLINE(0),
 
         /**
-         * File is favorite
+         * File is available offline
          */
-        FAVORITE(1),
+        AVAILABLE_OFFLINE(1),
 
         /**
-         * File belongs to any favorite folder
+         * File belongs to any available offline folder
          */
-        FAVORITE_PARENT(2);
+        AVAILABLE_OFFLINE_PARENT(2);
 
         private final int value;
 
-        FavoriteStatus(int value) {
+        AvailableOfflineStatus(int value) {
             this.value = value;
         }
 
@@ -82,14 +82,14 @@ public class OCFile implements Parcelable, Comparable<OCFile> {
             return value;
         }
 
-        public static FavoriteStatus fromValue(int value) {
+        public static AvailableOfflineStatus fromValue(int value) {
             switch (value) {
                 case 0:
-                    return NO_FAVORITE;
+                    return NO_AVAILABLE_OFFLINE;
                 case 1:
-                    return FAVORITE;
+                    return AVAILABLE_OFFLINE;
                 case 2:
-                    return FAVORITE_PARENT;
+                    return AVAILABLE_OFFLINE_PARENT;
             }
             return null;
         }
@@ -110,7 +110,7 @@ public class OCFile implements Parcelable, Comparable<OCFile> {
     private boolean mNeedsUpdating;
     private long mLastSyncDateForProperties;
     private long mLastSyncDateForData;
-    private FavoriteStatus mFavoriteStatus;
+    private AvailableOfflineStatus mAvailableOfflineStatus;
 
     private String mEtag;
 
@@ -168,9 +168,9 @@ public class OCFile implements Parcelable, Comparable<OCFile> {
         mMimeType = source.readString();
         mNeedsUpdating = source.readInt() == 0;
         try {
-            mFavoriteStatus = FavoriteStatus.valueOf(source.readString());
+            mAvailableOfflineStatus = AvailableOfflineStatus.valueOf(source.readString());
         } catch (IllegalArgumentException x) {
-            mFavoriteStatus = FavoriteStatus.NO_FAVORITE;
+            mAvailableOfflineStatus = AvailableOfflineStatus.NO_AVAILABLE_OFFLINE;
         }
         mLastSyncDateForProperties = source.readLong();
         mLastSyncDateForData = source.readLong();
@@ -198,7 +198,7 @@ public class OCFile implements Parcelable, Comparable<OCFile> {
         dest.writeString(mLocalPath);
         dest.writeString(mMimeType);
         dest.writeInt(mNeedsUpdating ? 1 : 0);
-        dest.writeString(mFavoriteStatus.name());
+        dest.writeString(mAvailableOfflineStatus.name());
         dest.writeLong(mLastSyncDateForProperties);
         dest.writeLong(mLastSyncDateForData);
         dest.writeString(mEtag);
@@ -417,7 +417,7 @@ public class OCFile implements Parcelable, Comparable<OCFile> {
         mModifiedTimestampAtLastSyncForData = 0;
         mLastSyncDateForProperties = 0;
         mLastSyncDateForData = 0;
-        mFavoriteStatus = null;
+        mAvailableOfflineStatus = null;
         mNeedsUpdating = false;
         mEtag = null;
         mShareByLink = false;
@@ -526,12 +526,12 @@ public class OCFile implements Parcelable, Comparable<OCFile> {
         mLastSyncDateForData = lastSyncDate;
     }
 
-    public void setFavoriteStatus(FavoriteStatus favorite) {
-        mFavoriteStatus = favorite;
+    public void setAvailableOfflineStatus(AvailableOfflineStatus availableOffline) {
+        mAvailableOfflineStatus = availableOffline;
     }
 
-    public FavoriteStatus getFavoriteStatus() {
-        return mFavoriteStatus;
+    public AvailableOfflineStatus getAvailableOfflineStatus() {
+        return mAvailableOfflineStatus;
     }
 
     @Override
@@ -568,7 +568,7 @@ public class OCFile implements Parcelable, Comparable<OCFile> {
         String asString = "[id=%s, name=%s, mime=%s, downloaded=%s, local=%s, remote=%s, " +
                 "parentId=%s, favorite=%s etag=%s]";
         asString = String.format(asString, Long.valueOf(mId), getFileName(), mMimeType, isDown(),
-                mLocalPath, mRemotePath, Long.valueOf(mParentId), mFavoriteStatus,
+                mLocalPath, mRemotePath, Long.valueOf(mParentId), mAvailableOfflineStatus,
                 mEtag);
         return asString;
     }
