@@ -284,11 +284,11 @@ public class FileDetailFragment extends FileFragment implements OnClickListener 
                 }
                 return true;
             }
-            case R.id.action_favorite_file:{
+            case R.id.action_set_available_offline:{
                 mContainerActivity.getFileOperationsHelper().toggleFavorite(getFile(), true);
                 return true;
             }
-            case R.id.action_unfavorite_file:{
+            case R.id.action_unset_available_offline:{
                 mContainerActivity.getFileOperationsHelper().toggleFavorite(getFile(), false);
                 return true;
             }
@@ -362,7 +362,7 @@ public class FileDetailFragment extends FileFragment implements OnClickListener 
             
             CheckBox cb = (CheckBox)getView().findViewById(R.id.fdFavorite);
             boolean isFavorite = false;
-            if (file.getAvailableOfflineStatus() != OCFile.AvailableOfflineStatus.NO_AVAILABLE_OFFLINE) {
+            if (file.getAvailableOfflineStatus() != OCFile.AvailableOfflineStatus.NOT_AVAILABLE_OFFLINE) {
                 isFavorite = true;
             }
             cb.setChecked(isFavorite);

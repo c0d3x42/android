@@ -60,7 +60,7 @@ public class OCFile implements Parcelable, Comparable<OCFile> {
         /**
          * File is not available offline
          */
-        NO_AVAILABLE_OFFLINE(0),
+        NOT_AVAILABLE_OFFLINE(0),
 
         /**
          * File is available offline
@@ -85,7 +85,7 @@ public class OCFile implements Parcelable, Comparable<OCFile> {
         public static AvailableOfflineStatus fromValue(int value) {
             switch (value) {
                 case 0:
-                    return NO_AVAILABLE_OFFLINE;
+                    return NOT_AVAILABLE_OFFLINE;
                 case 1:
                     return AVAILABLE_OFFLINE;
                 case 2:
@@ -170,7 +170,7 @@ public class OCFile implements Parcelable, Comparable<OCFile> {
         try {
             mAvailableOfflineStatus = AvailableOfflineStatus.valueOf(source.readString());
         } catch (IllegalArgumentException x) {
-            mAvailableOfflineStatus = AvailableOfflineStatus.NO_AVAILABLE_OFFLINE;
+            mAvailableOfflineStatus = AvailableOfflineStatus.NOT_AVAILABLE_OFFLINE;
         }
         mLastSyncDateForProperties = source.readLong();
         mLastSyncDateForData = source.readLong();
