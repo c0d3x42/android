@@ -54,8 +54,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Vector;
 
-import java.util.ArrayList;
-
 /**
  *
  */
@@ -466,7 +464,8 @@ public class FileOperationsHelper {
     }
 
     public void toggleFavorite(OCFile file, boolean isFavorite) {
-        if (file.getAvailableOfflineStatus() == OCFile.AvailableOfflineStatus.AVAILABLE_OFFLINE_PARENT) {
+        if (OCFile.AvailableOfflineStatus.AVAILABLE_OFFLINE_PARENT == file.getAvailableOfflineStatus()) {
+            /// files descending of an av-offline folder can't be toggled
             Toast.makeText(
                 mFileActivity,
                 mFileActivity.getString(R.string.available_offline_inherited_msg),
@@ -474,44 +473,37 @@ public class FileOperationsHelper {
             ).show();
 
         } else {
-            OCFile.AvailableOfflineStatus availableOfflineStatus = isFavorite ?
-                OCFile.AvailableOfflineStatus.AVAILABLE_OFFLINE : OCFile.AvailableOfflineStatus.NOT_AVAILABLE_OFFLINE;
-            file.setAvailableOfflineStatus(availableOfflineStatus);
-            mFileActivity.getStorageManager().saveFile(file);
+            /// update local property, for file and all its descendents (if folder)
+            OCFile.AvailableOfflineStatus targetAvailableOfflineStatus = isFavorite ?
+                OCFile.AvailableOfflineStatus.AVAILABLE_OFFLINE :
+                OCFile.AvailableOfflineStatus.NOT_AVAILABLE_OFFLINE;
+            file.setAvailableOfflineStatus(targetAvailableOfflineStatus);
+            boolean success = mFileActivity.getStorageManager().saveLocalAvailableOfflineStatus(file);
 
-            // If file is a folder, all children files that were available offline must be unset
-            if (file.isFolder() && isFavorite) {
-                toggleAvailableOfflineFilesInFolder(file, false);
-            }
+            if (success) {
+                /// register the OCFile instance in the observer service to monitor local updates
+                Intent observedFileIntent = FileObserverService.makeObservedFileIntent(
+                    mFileActivity,
+                    file,
+                    mFileActivity.getAccount(),
+                    isFavorite);
+                mFileActivity.startService(observedFileIntent);
 
-            /// register the OCFile instance in the observer service to monitor local updates
-            Intent observedFileIntent = FileObserverService.makeObservedFileIntent(
-                mFileActivity,
-                file,
-                mFileActivity.getAccount(),
-                isFavorite);
-            mFileActivity.startService(observedFileIntent);
-
-            /// immediate content synchronization
-            if (file.getAvailableOfflineStatus() == OCFile.AvailableOfflineStatus.AVAILABLE_OFFLINE) {
-                syncFile(file);
-            }
-        }
-    }
-
-    private void toggleAvailableOfflineFilesInFolder(OCFile file, boolean isAvailableOffline) {
-        OCFile.AvailableOfflineStatus availableOfflineStatus = isAvailableOffline ?
-                OCFile.AvailableOfflineStatus.AVAILABLE_OFFLINE : OCFile.AvailableOfflineStatus.NOT_AVAILABLE_OFFLINE;
-        Vector<OCFile> filesInFolder = mFileActivity.getStorageManager().getFolderContent(file);
-        for (OCFile fileInFolder: filesInFolder) {
-            fileInFolder.setAvailableOfflineStatus(availableOfflineStatus);
-            mFileActivity.getStorageManager().saveFile(fileInFolder);
-            if (fileInFolder.isFolder()) {
-                toggleAvailableOfflineFilesInFolder(fileInFolder, isAvailableOffline);
+                /// immediate content synchronization
+                if (OCFile.AvailableOfflineStatus.AVAILABLE_OFFLINE == file.getAvailableOfflineStatus()) {
+                    syncFile(file);
+                }
+            } else {
+                /// unexpected error
+                Toast.makeText(
+                    mFileActivity,
+                    mFileActivity.getString(R.string.common_error_unknown),
+                    Toast.LENGTH_SHORT
+                ).show();
             }
         }
     }
-    
+
     public void renameFile(OCFile file, String newFilename) {
         // RenameFile
         Intent service = new Intent(mFileActivity, OperationsService.class);
